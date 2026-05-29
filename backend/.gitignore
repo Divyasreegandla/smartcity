@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+error_log/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+*.egg
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# UVicorn
+uvicorn.log
+
+# Alembic
+alembic/versions/*.pyc
+
+# Project specific
+backend/__pycache__/
+backend/routers/__pycache__/
+backend/models/__pycache__/
+backend/schemas/__pycache__/
+backend/services/__pycache__/
+backend/database/__pycache__/
+backend/utils/__pycache__/
