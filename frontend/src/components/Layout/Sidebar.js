@@ -1,6 +1,14 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaTachometerAlt, FaUser, FaUsers } from 'react-icons/fa';
+import { 
+  FaTachometerAlt, 
+  FaUser, 
+  FaUsers, 
+  FaFileAlt, 
+  FaPlusCircle, 
+  FaBuilding,
+  FaChartBar
+} from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
@@ -8,14 +16,20 @@ const Sidebar = () => {
   const isAdmin = user?.role === 'admin';
 
   const citizenMenu = [
-    { path: '/dashboard', name: 'Dashboard', icon: FaTachometerAlt },
-    { path: '/profile', name: 'My Profile', icon: FaUser },
+    { path: '/dashboard', name: 'Dashboard', icon: FaTachometerAlt, end: true },
+    { path: '/complaints', name: 'My Complaints', icon: FaFileAlt, end: true },
+    { path: '/complaints/raise', name: 'Raise Complaint', icon: FaPlusCircle, end: true },
+    { path: '/my-assignments', name: 'My Assignments', icon: FaBuilding, end: true },
+    { path: '/profile', name: 'My Profile', icon: FaUser, end: true },
+
   ];
 
   const adminMenu = [
-    { path: '/dashboard', name: 'Dashboard', icon: FaTachometerAlt },
-    { path: '/citizens', name: 'Citizens List', icon: FaUsers },
-    { path: '/profile', name: 'My Profile', icon: FaUser },
+    { path: '/admin-dashboard', name: 'Dashboard', icon: FaChartBar, end: true },
+    { path: '/complaints', name: 'All Complaints', icon: FaFileAlt, end: true },
+    { path: '/departments', name: 'Departments', icon: FaBuilding, end: true },
+    { path: '/citizens', name: 'Citizens', icon: FaUsers, end: true },
+    { path: '/profile', name: 'My Profile', icon: FaUser, end: true },
   ];
 
   const menuItems = isAdmin ? adminMenu : citizenMenu;
@@ -24,7 +38,7 @@ const Sidebar = () => {
     <aside className="w-64 bg-gray-900 text-white h-screen fixed left-0 top-0 overflow-y-auto">
       <div className="p-6 border-b border-gray-800">
         <h2 className="text-2xl font-bold text-primary-400">Smart City</h2>
-        <p className="text-sm text-gray-400 mt-1">Management Platform</p>
+        <p className="text-sm text-gray-400 mt-1">Complaint Management</p>
       </div>
       
       <div className="p-4 border-b border-gray-800 bg-gray-800/50">
@@ -38,6 +52,7 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.end}
             className={({ isActive }) =>
               `flex items-center space-x-3 px-6 py-3 transition-colors ${
                 isActive
@@ -53,7 +68,7 @@ const Sidebar = () => {
       </nav>
       
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
-        <p className="text-xs text-gray-500 text-center">Smart City Platform v1.0</p>
+        <p className="text-xs text-gray-500 text-center">Smart City Platform v2.0</p>
       </div>
     </aside>
   );

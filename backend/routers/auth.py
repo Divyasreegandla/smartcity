@@ -4,32 +4,16 @@ from database.database import get_db
 from models.users import User
 from models.citizen_profiles import CitizenProfile
 from schemas.auth_schemas import UserCreate, UserLogin, Token, UserResponse
-from utils.auth_utils import (
-    verify_password, 
-    get_password_hash, 
-    create_access_token,
-    get_current_user
-)
+from utils.auth_utils import verify_password, get_password_hash, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post(
-    "/register",
-    response_model=Token,
-    status_code=status.HTTP_201_CREATED,
-    summary="Register a new user"
-)
+@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    """Register a new user"""
-    # Check if user exists
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
+    existing = db.query(User).filter(User.email == user_data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create new user
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
         full_name=user_data.full_name,
@@ -41,57 +25,25 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    # Create empty citizen profile
-    citizen_profile = CitizenProfile(
-        user_id=db_user.id,
-        phone="",
-        address="",
-        city="",
-        state="",
-        pincode=""
-    )
-    db.add(citizen_profile)
+    profile = CitizenProfile(user_id=db_user.id)
+    db.add(profile)
     db.commit()
     
-    # Create token
-    access_token = create_access_token(
-        data={"id": db_user.id, "email": db_user.email, "role": db_user.role}
-    )
+    token = create_access_token({"id": db_user.id, "email": db_user.email, "role": db_user.role})
     
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": db_user
-    }
+    return {"access_token": token, "token_type": "bearer", "user": db_user}
 
 @router.post("/login", response_model=Token)
 def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
-    """Login user and return JWT token"""
     user = db.query(User).filter(User.email == user_credentials.email).first()
     
     if not user or not verify_password(user_credentials.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
-        )
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Account is deactivated"
-        )
+    token = create_access_token({"id": user.id, "email": user.email, "role": user.role})
     
-    access_token = create_access_token(
-        data={"id": user.id, "email": user.email, "role": user.role}
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user
-    }
+    return {"access_token": token, "token_type": "bearer", "user": user}
 
 @router.get("/profile", response_model=UserResponse)
 def get_profile(current_user: User = Depends(get_current_user)):
-    """Get current user profile"""
     return current_user

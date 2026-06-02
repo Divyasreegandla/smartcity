@@ -10,7 +10,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add token
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,12 +19,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+// Response interceptor - FIXED to handle error objects properly
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,9 +31,30 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
       toast.error('Session expired. Please login again.');
-    } else if (error.response?.data?.detail) {
-      toast.error(error.response.data.detail);
+    } 
+    else if (error.response?.data?.detail) {
+      // Handle different detail formats
+      const detail = error.response.data.detail;
+      
+      if (typeof detail === 'string') {
+        toast.error(detail);
+      } 
+      else if (Array.isArray(detail)) {
+        // Pydantic validation errors - extract message only
+        detail.forEach((err) => {
+          const message = err.msg || err.message || 'Validation error';
+          toast.error(message);
+        });
+      } 
+      else if (typeof detail === 'object') {
+        // Convert object to string message
+        toast.error(JSON.stringify(detail));
+      }
+    } 
+    else if (error.message) {
+      toast.error(error.message);
     }
+    
     return Promise.reject(error);
   }
 );
@@ -49,5 +68,32 @@ export const getProfile = () => api.get('/auth/profile');
 export const getCitizens = () => api.get('/citizens/');
 export const getCitizenProfile = (userId) => api.get(`/citizens/${userId}`);
 export const updateCitizenProfile = (userId, data) => api.put(`/citizens/${userId}`, data);
+
+// Complaint APIs
+export const createComplaint = (data) => api.post('/complaints', data);
+export const getComplaints = (params) => api.get('/complaints', { params });
+export const getComplaintById = (id) => api.get(`/complaints/${id}`);
+export const updateComplaint = (id, data) => api.put(`/complaints/${id}`, data);
+export const deleteComplaint = (id) => api.delete(`/complaints/${id}`);
+export const updateComplaintStatus = (id, data) => api.put(`/complaints/${id}/status`, data);
+export const getComplaintHistory = (id) => api.get(`/complaints/${id}/history`);
+export const uploadComplaintImage = (complaintId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post(`/complaints/${complaintId}/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+// Department APIs
+export const createDepartment = (data) => api.post('/departments', data);
+export const getDepartments = () => api.get('/departments');
+export const updateDepartment = (id, data) => api.put(`/departments/${id}`, data);
+export const deleteDepartment = (id) => api.delete(`/departments/${id}`);
+
+// Assignment APIs
+export const assignComplaint = (data) => api.post('/assignments', data);
+export const getComplaintAssignments = (complaintId) => api.get(`/assignments/complaint/${complaintId}`);
+export const getMyAssignments = () => api.get('/assignments/my-assignments');
 
 export default api;

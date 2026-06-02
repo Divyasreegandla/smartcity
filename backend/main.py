@@ -1,45 +1,38 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+
 from database.database import engine, Base
-from routers import auth_router, citizens_router
-import os
-from dotenv import load_dotenv
+from routers import auth_router, citizens_router, complaints_router, departments_router, assignments_router
 
-# Load environment variables
-load_dotenv()
-
-# Create database tables
+# Create tables
 Base.metadata.create_all(bind=engine)
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="Smart City Management Platform API",
-    description="API for Smart City Management System",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
+# Create uploads directory
+Path("uploads/complaints").mkdir(parents=True, exist_ok=True)
 
-# CORS configuration
+app = FastAPI(title="Smart City Platform", version="2.0.0")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 app.include_router(auth_router)
 app.include_router(citizens_router)
+app.include_router(complaints_router)
+app.include_router(departments_router)
+app.include_router(assignments_router)
 
 @app.get("/")
 def root():
-    return {
-        "message": "Welcome to Smart City Management Platform API",
-        "docs": "/docs",
-        "version": "1.0.0"
-    }
+    return {"message": "Smart City Platform API", "version": "2.0.0"}
 
 @app.get("/health")
 def health_check():
