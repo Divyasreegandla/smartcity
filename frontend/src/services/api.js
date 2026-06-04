@@ -21,8 +21,7 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-// Response interceptor - FIXED to handle error objects properly
+// In api.js, ensure the error interceptor extracts string messages
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,32 +32,19 @@ api.interceptors.response.use(
       toast.error('Session expired. Please login again.');
     } 
     else if (error.response?.data?.detail) {
-      // Handle different detail formats
       const detail = error.response.data.detail;
-      
       if (typeof detail === 'string') {
         toast.error(detail);
-      } 
-      else if (Array.isArray(detail)) {
-        // Pydantic validation errors - extract message only
+      } else if (Array.isArray(detail)) {
         detail.forEach((err) => {
           const message = err.msg || err.message || 'Validation error';
           toast.error(message);
         });
-      } 
-      else if (typeof detail === 'object') {
-        // Convert object to string message
-        toast.error(JSON.stringify(detail));
       }
-    } 
-    else if (error.message) {
-      toast.error(error.message);
     }
-    
     return Promise.reject(error);
   }
 );
-
 // Auth APIs
 export const register = (userData) => api.post('/auth/register', userData);
 export const login = (credentials) => api.post('/auth/login', credentials);
@@ -95,5 +81,40 @@ export const deleteDepartment = (id) => api.delete(`/departments/${id}`);
 export const assignComplaint = (data) => api.post('/assignments', data);
 export const getComplaintAssignments = (complaintId) => api.get(`/assignments/complaint/${complaintId}`);
 export const getMyAssignments = () => api.get('/assignments/my-assignments');
+// ============ PHASE 3: Water Supply APIs ============
+
+// Water Zones
+export const createWaterZone = (data) => api.post('/water-zones', data);
+export const getWaterZones = (params) => api.get('/water-zones', { params });
+export const getWaterZoneById = (id) => api.get(`/water-zones/${id}`);
+export const updateWaterZone = (id, data) => api.put(`/water-zones/${id}`, data);
+export const deleteWaterZone = (id) => api.delete(`/water-zones/${id}`);
+
+// Water Supply Schedules
+export const createWaterSchedule = (data) => api.post('/water-schedules', data);
+export const getWaterSchedules = (params) => api.get('/water-schedules', { params });
+export const updateWaterSchedule = (id, data) => api.put(`/water-schedules/${id}`, data);
+
+// Water Tanks
+export const createWaterTank = (data) => api.post('/water-tanks', data);
+export const getWaterTanks = (params) => api.get('/water-tanks', { params });
+export const getWaterTankById = (id) => api.get(`/water-tanks/${id}`);
+export const updateWaterTank = (id, data) => api.put(`/water-tanks/${id}`, data);
+
+// Water Consumption
+export const createWaterConsumption = (data) => api.post('/water-consumption', data);
+export const getWaterConsumption = (params) => api.get('/water-consumption', { params });
+export const getZoneConsumptionSummary = (zoneId) => api.get(`/water-consumption/zone/${zoneId}`);
+
+// Water Leak Reports
+export const createWaterLeakReport = (data) => api.post('/water-leak-reports', data);
+export const getWaterLeakReports = (params) => api.get('/water-leak-reports', { params });
+export const updateWaterLeakReport = (id, data) => api.put(`/water-leak-reports/${id}`, data);
+
+// Water Dashboard
+export const getWaterDashboardStats = () => api.get('/water-dashboard/stats');
+export const getWeeklyWaterTrend = () => api.get('/water-dashboard/weekly-trend');
+export const getZoneWiseWaterConsumption = () => api.get('/water-dashboard/zone-consumption');
+export const getWaterLeakageSummary = () => api.get('/water-dashboard/leakage-summary');
 
 export default api;

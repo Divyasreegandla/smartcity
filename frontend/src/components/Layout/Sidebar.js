@@ -7,7 +7,11 @@ import {
   FaFileAlt, 
   FaPlusCircle, 
   FaBuilding,
-  FaChartBar
+  FaChartBar,
+  FaTint,           // NEW
+  FaCalendarAlt,    // NEW
+  FaChartLine,      // NEW
+  FaExclamationTriangle  // NEW
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,6 +25,9 @@ const Sidebar = () => {
     { path: '/complaints/raise', name: 'Raise Complaint', icon: FaPlusCircle, end: true },
     { path: '/my-assignments', name: 'My Assignments', icon: FaBuilding, end: true },
     { path: '/profile', name: 'My Profile', icon: FaUser, end: true },
+    { path: '/water-dashboard', name: 'Water Supply', icon: FaTint, end: true },
+{ path: '/water-zones', name: 'Water Zones', icon: FaBuilding, end: true },
+{ path: '/water-leaks', name: 'Report Leak', icon: FaExclamationTriangle, end: true },
 
   ];
 
@@ -29,6 +36,12 @@ const Sidebar = () => {
     { path: '/complaints', name: 'All Complaints', icon: FaFileAlt, end: true },
     { path: '/departments', name: 'Departments', icon: FaBuilding, end: true },
     { path: '/citizens', name: 'Citizens', icon: FaUsers, end: true },
+    { path: '/water-dashboard', name: 'Water Dashboard', icon: FaTint, end: true },
+{ path: '/water-zones', name: 'Water Zones', icon: FaBuilding, end: true },
+{ path: '/water-schedules', name: 'Supply Schedule', icon: FaCalendarAlt, end: true },
+{ path: '/water-tanks', name: 'Water Tanks', icon: FaTint, end: true },
+{ path: '/water-consumption', name: 'Consumption', icon: FaChartLine, end: true },
+{ path: '/water-leaks', name: 'Leak Reports', icon: FaExclamationTriangle, end: true },
     { path: '/profile', name: 'My Profile', icon: FaUser, end: true },
   ];
 

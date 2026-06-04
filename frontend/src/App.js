@@ -14,6 +14,12 @@ import ComplaintDetails from './pages/ComplaintDetails';
 import DepartmentManagement from './pages/DepartmentManagement';
 import AdminDashboard from './pages/AdminDashboard';
 import MyAssignments from './pages/MyAssignments';
+import WaterDashboard from './pages/WaterDashboard';
+import WaterZones from './pages/WaterZones';
+import WaterSchedules from './pages/WaterSchedules';
+import WaterTanks from './pages/WaterTanks';
+import WaterLeakReports from './pages/WaterLeakReports';
+import WaterConsumption from './pages/WaterConsumption';
 
 function App() {
   return (
@@ -43,6 +49,37 @@ function App() {
           <Route path="/complaints/raise" element={<ProtectedRoute><RaiseComplaint /></ProtectedRoute>} />
           <Route path="/complaints/:id" element={<ProtectedRoute><ComplaintDetails /></ProtectedRoute>} />
           <Route path="/departments" element={<ProtectedRoute adminOnly><DepartmentManagement /></ProtectedRoute>} />
+          <Route path="/water-dashboard" element={
+  <ProtectedRoute>
+    <WaterDashboard />
+  </ProtectedRoute>
+} />
+<Route path="/water-zones" element={
+  <ProtectedRoute>
+    <WaterZones />
+  </ProtectedRoute>
+} />
+<Route path="/water-schedules" element={
+  <ProtectedRoute adminOnly>
+    <WaterSchedules />
+  </ProtectedRoute>
+} />
+<Route path="/water-tanks" element={
+  <ProtectedRoute>
+    <WaterTanks />
+  </ProtectedRoute>
+} />
+<Route path="/water-leaks" element={
+  <ProtectedRoute>
+    <WaterLeakReports />
+  </ProtectedRoute>
+} />
+<Route path="/water-consumption" element={
+  <ProtectedRoute adminOnly>
+    <WaterConsumption />
+  </ProtectedRoute>
+} />
+
         </Routes>
       </AuthProvider>
     </Router>
