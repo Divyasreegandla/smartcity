@@ -10,6 +10,11 @@ from .water_supply_schedules import WaterSupplySchedule, SupplyStatus
 from .water_tanks import WaterTank, TankStatus
 from .water_consumption import WaterConsumption
 from .water_leak_reports import WaterLeakReport, LeakStatus
+from .substations import Substation, SubstationStatus
+from .transformers import Transformer, TransformerStatus
+from .electricity_usage import ElectricityUsage
+from .power_outages import PowerOutage, OutageStatus
+from .transformer_maintenance import TransformerMaintenance, MaintenanceType
 
 __all__ = [
     "User",
@@ -29,5 +34,14 @@ __all__ = [
     "TankStatus",
     "WaterConsumption",
     "WaterLeakReport",
-    "LeakStatus"
+    "LeakStatus",
+    "Substation",
+    "SubstationStatus",
+    "Transformer",
+    "TransformerStatus",
+    "ElectricityUsage",
+    "PowerOutage",
+    "OutageStatus",
+    "TransformerMaintenance",
+    "MaintenanceType"
 ]

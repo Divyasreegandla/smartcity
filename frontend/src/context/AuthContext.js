@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as loginApi, register as registerApi, getProfile } from '../services/api';
 import toast from 'react-hot-toast';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -17,12 +17,19 @@ export const AuthProvider = ({ children }) => {
       
       if (storedToken && storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
-          await getProfile();
+          // Verify token with backend
+          const response = await fetch(`${API_URL}/auth/profile`, {
+            headers: { 'Authorization': `Bearer ${storedToken}` }
+          });
+          
+          if (response.ok) {
+            setUser(JSON.parse(storedUser));
+          } else {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         } catch (error) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setUser(null);
+          console.error('Auth check failed:', error);
         }
       }
       setLoading(false);
@@ -33,31 +40,49 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await registerApi(userData);
-      toast.success('Registration successful! Please login.');
-      return { success: true };
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      
+      if (response.ok) {
+        toast.success('Registration successful! Please login.');
+        return { success: true };
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || 'Registration failed');
+        return { success: false, error: error.detail };
+      }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Registration failed';
-      toast.error(errorMsg);
-      return { success: false, error: errorMsg };
+      toast.error('Network error. Please check if backend is running.');
+      return { success: false, error: error.message };
     }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await loginApi({ email, password });
-      const { access_token, user } = response.data;
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
       
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      const data = await response.json();
       
-      toast.success(`Welcome back, ${user.full_name}!`);
-      return { success: true };
+      if (response.ok) {
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        toast.success(`Welcome back, ${data.user.full_name}!`);
+        return { success: true };
+      } else {
+        toast.error(data.detail || 'Login failed');
+        return { success: false, error: data.detail };
+      }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Login failed';
-      toast.error(errorMsg);
-      return { success: false, error: errorMsg };
+      toast.error('Network error. Please check if backend is running.');
+      return { success: false, error: error.message };
     }
   };
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getCitizens, getComplaints, updateCitizenProfile } from '../services/api';
+import { getCitizens, getComplaints, getPowerDashboardStats } from '../services/api';
 import Layout from '../components/Layout/Layout';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaUsers, FaSearch, FaEye, FaEdit, 
   FaUserPlus, FaEnvelope, FaPhone, FaMapMarker,
   FaFileAlt, FaClock, FaCheckCircle, FaExclamationTriangle,
-  FaChartLine, FaTimes, FaSave
+  FaChartLine, FaTimes, FaSave, FaBolt, FaBuilding
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -16,6 +16,16 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [citizens, setCitizens] = useState([]);
   const [complaints, setComplaints] = useState([]);
+  const [powerStats, setPowerStats] = useState({
+    total_substations: 0,
+    active_substations: 0,
+    total_transformers: 0,
+    active_transformers: 0,
+    fault_transformers: 0,
+    today_consumption_kwh: 0,
+    active_outages: 0,
+    maintenance_due_count: 0
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
@@ -27,13 +37,6 @@ const AdminDashboard = () => {
     state: '',
     pincode: ''
   });
-  const [stats, setStats] = useState({
-    totalComplaints: 0,
-    pendingComplaints: 0,
-    inProgressComplaints: 0,
-    resolvedComplaints: 0,
-    criticalComplaints: 0
-  });
 
   useEffect(() => {
     fetchAllData();
@@ -42,31 +45,15 @@ const AdminDashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Fetch citizens
-      const citizensRes = await getCitizens().catch(() => ({ data: [] }));
-      const citizensData = citizensRes.data;
+      const [citizensRes, complaintsRes, powerStatsRes] = await Promise.all([
+        getCitizens().catch(() => ({ data: [] })),
+        getComplaints().catch(() => ({ data: [] })),
+        getPowerDashboardStats().catch(() => ({ data: {} }))
+      ]);
       
-      // Fetch complaints
-      const complaintsRes = await getComplaints().catch(() => ({ data: [] }));
-      const complaintsData = complaintsRes.data;
-      
-      setCitizens(citizensData);
-      setComplaints(complaintsData);
-      
-      // Calculate statistics
-      const total = complaintsData.length;
-      const pending = complaintsData.filter(c => c.status === 'pending').length;
-      const inProgress = complaintsData.filter(c => c.status === 'in_progress').length;
-      const resolved = complaintsData.filter(c => c.status === 'resolved').length;
-      const critical = complaintsData.filter(c => c.priority === 'critical').length;
-      
-      setStats({
-        totalComplaints: total,
-        pendingComplaints: pending,
-        inProgressComplaints: inProgress,
-        resolvedComplaints: resolved,
-        criticalComplaints: critical
-      });
+      setCitizens(citizensRes.data);
+      setComplaints(complaintsRes.data);
+      setPowerStats(powerStatsRes.data);
       
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -100,16 +87,11 @@ const AdminDashboard = () => {
       await updateCitizenProfile(selectedCitizen.user_id, editForm);
       toast.success('Profile updated successfully!');
       setShowEditModal(false);
-      fetchAllData(); // Refresh the list
+      fetchAllData();
     } catch (error) {
       console.error('Error:', error);
       toast.error(error.response?.data?.detail || 'Failed to update profile');
     }
-  };
-
-  const handleViewCitizen = (citizen) => {
-    setSelectedCitizen(citizen);
-    setShowEditModal(true); // Reuse modal for view (read-only mode)
   };
 
   const getStatusBadge = (status) => {
@@ -153,7 +135,6 @@ const AdminDashboard = () => {
     citizen.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get recent complaints (last 3)
   const recentComplaints = [...complaints]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 3);
@@ -191,16 +172,67 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Power Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Total Substations</p>
+                <p className="text-3xl font-bold text-primary-600">{powerStats.total_substations}</p>
+              </div>
+              <div className="bg-primary-100 p-3 rounded-full">
+                <FaBuilding className="text-primary-600 text-xl" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Total Transformers</p>
+                <p className="text-3xl font-bold text-blue-600">{powerStats.total_transformers}</p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <FaBolt className="text-blue-600 text-xl" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Today's Consumption</p>
+                <p className="text-3xl font-bold text-green-600">{(powerStats.today_consumption_kwh / 1000).toFixed(1)}k kWh</p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <FaChartLine className="text-green-600 text-xl" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Active Outages</p>
+                <p className="text-3xl font-bold text-red-600">{powerStats.active_outages}</p>
+              </div>
+              <div className="bg-red-100 p-3 rounded-full">
+                <FaExclamationTriangle className="text-red-600 text-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Second Row - Complaint Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm">Total Complaints</p>
-                <p className="text-3xl font-bold text-primary-600">{stats.totalComplaints}</p>
+                <p className="text-3xl font-bold text-gray-800">{complaints.length}</p>
               </div>
-              <div className="bg-primary-100 p-3 rounded-full">
-                <FaFileAlt className="text-primary-600 text-xl" />
+              <div className="bg-gray-100 p-3 rounded-full">
+                <FaFileAlt className="text-gray-600 text-xl" />
               </div>
             </div>
           </div>
@@ -209,7 +241,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm">Pending Complaints</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats.pendingComplaints}</p>
+                <p className="text-3xl font-bold text-yellow-600">{complaints.filter(c => c.status === 'pending').length}</p>
               </div>
               <div className="bg-yellow-100 p-3 rounded-full">
                 <FaClock className="text-yellow-600 text-xl" />
@@ -220,38 +252,11 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm">In Progress</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.inProgressComplaints}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <FaChartLine className="text-blue-600 text-xl" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Resolved</p>
-                <p className="text-3xl font-bold text-green-600">{stats.resolvedComplaints}</p>
+                <p className="text-gray-500 text-sm">Resolved Complaints</p>
+                <p className="text-3xl font-bold text-green-600">{complaints.filter(c => c.status === 'resolved').length}</p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
                 <FaCheckCircle className="text-green-600 text-xl" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Second Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Critical Complaints</p>
-                <p className="text-3xl font-bold text-red-600">{stats.criticalComplaints}</p>
-              </div>
-              <div className="bg-red-100 p-3 rounded-full">
-                <FaExclamationTriangle className="text-red-600 text-xl" />
               </div>
             </div>
           </div>
@@ -269,7 +274,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Recent Complaints */}
+        {/* Recent Complaints Table */}
         {recentComplaints.length > 0 && (
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -390,13 +395,6 @@ const AdminDashboard = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <button 
-                          onClick={() => handleViewCitizen(citizen)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="View Details"
-                        >
-                          <FaEye />
-                        </button>
                         <button 
                           onClick={() => handleEditClick(citizen)}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"

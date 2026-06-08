@@ -9,8 +9,12 @@ from routers import (
     departments_router, assignments_router,
     water_zones_router, water_schedules_router,
     water_tanks_router, water_consumption_router,
-    water_leaks_router, water_dashboard_router  # NEW
+    water_leaks_router, water_dashboard_router,
+    substations_router, transformers_router,
+    electricity_usage_router, power_outages_router,
+    maintenance_router, power_dashboard_router
 )
+
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -44,14 +48,21 @@ app.include_router(water_tanks_router)
 app.include_router(water_consumption_router)
 app.include_router(water_leaks_router)
 app.include_router(water_dashboard_router)  # NEW
+app.include_router(substations_router)
+app.include_router(transformers_router)
+app.include_router(electricity_usage_router)
+app.include_router(power_outages_router)
+app.include_router(maintenance_router)
+app.include_router(power_dashboard_router)
 
 @app.get("/")
 def root():
     return {
         "message": "Smart City Platform API", 
-        "version": "3.0.0",
-        "modules": ["Auth", "Citizens", "Complaints", "Departments", "Water Supply"]
+        "version": "4.0.0",
+        "modules": ["Auth", "Citizens", "Complaints", "Departments", "Water Supply", "Electricity Power"]
     }
+
 
 @app.get("/health")
 def health_check():

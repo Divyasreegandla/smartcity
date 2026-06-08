@@ -20,6 +20,12 @@ import WaterSchedules from './pages/WaterSchedules';
 import WaterTanks from './pages/WaterTanks';
 import WaterLeakReports from './pages/WaterLeakReports';
 import WaterConsumption from './pages/WaterConsumption';
+import ElectricityDashboard from './pages/ElectricityDashboard';
+import SubstationManagement from './pages/SubstationManagement';
+import TransformerManagement from './pages/TransformerManagement';
+import PowerOutageTracking from './pages/PowerOutageTracking';
+import ElectricityConsumption from './pages/ElectricityConsumption';
+import MaintenanceManagement from './pages/MaintenanceManagement';
 
 function App() {
   return (
@@ -79,6 +85,38 @@ function App() {
     <WaterConsumption />
   </ProtectedRoute>
 } />
+{/* Phase 4 - Electricity Power Routes */}
+<Route path="/electricity-dashboard" element={
+  <ProtectedRoute>
+    <ElectricityDashboard />
+  </ProtectedRoute>
+} />
+<Route path="/substations" element={
+  <ProtectedRoute>
+    <SubstationManagement />
+  </ProtectedRoute>
+} />
+<Route path="/transformers" element={
+  <ProtectedRoute>
+    <TransformerManagement />
+  </ProtectedRoute>
+} />
+<Route path="/power-outages" element={
+  <ProtectedRoute>
+    <PowerOutageTracking />
+  </ProtectedRoute>
+} />
+<Route path="/electricity-consumption" element={
+  <ProtectedRoute>
+    <ElectricityConsumption />
+  </ProtectedRoute>
+} />
+<Route path="/maintenance" element={
+  <ProtectedRoute adminOnly>
+    <MaintenanceManagement />
+  </ProtectedRoute>
+} />
+
 
         </Routes>
       </AuthProvider>

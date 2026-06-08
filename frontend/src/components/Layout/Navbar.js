@@ -14,9 +14,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md px-6 py-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-primary-600">Smart City Platform</h1>
-        
+      <div className="flex justify-end items-center">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <FaUserCircle className="text-gray-600 text-2xl" />

@@ -116,5 +116,39 @@ export const getWaterDashboardStats = () => api.get('/water-dashboard/stats');
 export const getWeeklyWaterTrend = () => api.get('/water-dashboard/weekly-trend');
 export const getZoneWiseWaterConsumption = () => api.get('/water-dashboard/zone-consumption');
 export const getWaterLeakageSummary = () => api.get('/water-dashboard/leakage-summary');
+// Substation APIs
+export const createSubstation = (data) => api.post('/substations', data);
+export const getSubstations = (params) => api.get('/substations', { params });
+export const getSubstationById = (id) => api.get(`/substations/${id}`);
+export const updateSubstation = (id, data) => api.put(`/substations/${id}`, data);
+export const deleteSubstation = (id) => api.delete(`/substations/${id}`);
+
+// Transformer APIs
+export const createTransformer = (data) => api.post('/transformers', data);
+export const getTransformers = (params) => api.get('/transformers', { params });
+export const getTransformerById = (id) => api.get(`/transformers/${id}`);
+export const updateTransformer = (id, data) => api.put(`/transformers/${id}`, data);
+
+// Electricity Usage APIs
+export const createElectricityUsage = (data) => api.post('/electricity-usage', data);
+export const getElectricityUsage = (params) => api.get('/electricity-usage', { params });
+export const getAreaUsageSummary = (areaName, days = 30) => api.get(`/electricity-usage/area/${areaName}?days=${days}`);
+
+// Power Outage APIs
+export const createPowerOutage = (data) => api.post('/power-outages', data);
+export const getPowerOutages = (params) => api.get('/power-outages', { params });
+export const getPowerOutageById = (id) => api.get(`/power-outages/${id}`);
+export const updatePowerOutage = (id, data) => api.put(`/power-outages/${id}`, data);
+export const getCurrentOutages = () => api.get('/power-outages/active/current');
+
+// Maintenance APIs
+export const createMaintenance = (data) => api.post('/transformer-maintenance', data);
+export const getMaintenanceRecords = (params) => api.get('/transformer-maintenance', { params });
+export const updateMaintenance = (id, data) => api.put(`/transformer-maintenance/${id}`, data);
+
+// Power Dashboard APIs
+export const getPowerDashboardStats = () => api.get('/power-dashboard/stats');
+export const getConsumptionTrend = (days = 7) => api.get(`/power-dashboard/consumption-trend?days=${days}`);
+export const getAreaRanking = () => api.get('/power-dashboard/area-ranking');
 
 export default api;

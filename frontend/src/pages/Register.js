@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { FaUser, FaEnvelope, FaLock, FaUserTag, FaCity } from 'react-icons/fa';
 import { validateEmail, validatePassword } from '../utils/validation';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const { register } = useAuth();
+  const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -34,12 +35,29 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setApiError('');
     setLoading(true);
-    const result = await register(formData);
-    if (result.success) {
-      navigate('/login');
+    
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Registration successful! Please login.');
+        navigate('/login');
+      } else {
+        setApiError(data.detail || 'Registration failed');
+      }
+    } catch (err) {
+      setApiError('Network error. Please check if backend is running.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -56,6 +74,12 @@ const Register = () => {
           <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
           <p className="text-gray-600 mt-2">Join Smart City Platform</p>
         </div>
+        
+        {apiError && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            {apiError}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
