@@ -15,6 +15,13 @@ from .electricity_usage import router as electricity_usage_router
 from .power_outages import router as power_outages_router
 from .maintenance import router as maintenance_router
 from .power_dashboard import router as power_dashboard_router
+# Phase 5 - Waste Management
+from .waste_vehicles import router as waste_vehicles_router
+from .collection_routes import router as collection_routes_router
+from .waste_bins import router as waste_bins_router
+from .waste_collections import router as waste_collections_router
+from .sanitation_workers import router as sanitation_workers_router
+from .waste_dashboard import router as waste_dashboard_router
 
 __all__ = [
     "auth_router",
@@ -33,5 +40,11 @@ __all__ = [
     "electricity_usage_router",
     "power_outages_router",
     "maintenance_router",
-    "power_dashboard_router"
+    "power_dashboard_router",
+    "waste_vehicles_router",
+    "collection_routes_router",
+    "waste_bins_router",
+    "waste_collections_router",
+    "sanitation_workers_router",
+    "waste_dashboard_router"
 ]

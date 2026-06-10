@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { FaEnvelope, FaLock, FaCity } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -9,12 +10,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
+    console.log('Attempting login with:', email);
     
     try {
       // Direct fetch to backend
@@ -25,17 +29,27 @@ const Login = () => {
       });
       
       const data = await response.json();
+      console.log('Login response:', data);
       
       if (response.ok) {
+        // Store token and user data
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        // Trigger storage event for AuthContext
-        window.dispatchEvent(new Event('storage'));
-        navigate('/dashboard');
+        
+        // Update AuthContext
+        const result = await login(email, password);
+        
+        if (result.success) {
+          console.log('Login successful, redirecting to dashboard');
+          navigate('/dashboard');
+        } else {
+          setError(result.error || 'Login failed');
+        }
       } else {
-        setError(data.detail || 'Login failed');
+        setError(data.detail || 'Invalid email or password');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Network error. Please check if backend is running.');
     } finally {
       setLoading(false);
@@ -93,7 +107,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

@@ -12,7 +12,11 @@ from routers import (
     water_leaks_router, water_dashboard_router,
     substations_router, transformers_router,
     electricity_usage_router, power_outages_router,
-    maintenance_router, power_dashboard_router
+    maintenance_router, power_dashboard_router,
+    waste_vehicles_router, collection_routes_router,
+    waste_bins_router, waste_collections_router,
+    sanitation_workers_router, waste_dashboard_router
+
 )
 
 
@@ -54,13 +58,19 @@ app.include_router(electricity_usage_router)
 app.include_router(power_outages_router)
 app.include_router(maintenance_router)
 app.include_router(power_dashboard_router)
+app.include_router(waste_vehicles_router)
+app.include_router(collection_routes_router)
+app.include_router(waste_bins_router)
+app.include_router(waste_collections_router)
+app.include_router(sanitation_workers_router)
+app.include_router(waste_dashboard_router)
 
 @app.get("/")
 def root():
     return {
         "message": "Smart City Platform API", 
-        "version": "4.0.0",
-        "modules": ["Auth", "Citizens", "Complaints", "Departments", "Water Supply", "Electricity Power"]
+        "version": "5.0.0",
+        "modules": ["Auth", "Citizens", "Complaints", "Departments", "Water Supply", "Electricity Power", "Waste Management"]
     }
 
 

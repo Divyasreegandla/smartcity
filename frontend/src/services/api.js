@@ -150,5 +150,51 @@ export const updateMaintenance = (id, data) => api.put(`/transformer-maintenance
 export const getPowerDashboardStats = () => api.get('/power-dashboard/stats');
 export const getConsumptionTrend = (days = 7) => api.get(`/power-dashboard/consumption-trend?days=${days}`);
 export const getAreaRanking = () => api.get('/power-dashboard/area-ranking');
+// Waste Vehicle APIs
+export const createWasteVehicle = (data) => api.post('/waste-vehicles', data);
+export const getWasteVehicles = (params) => api.get('/waste-vehicles', { params });
+export const getWasteVehicleById = (id) => api.get(`/waste-vehicles/${id}`);
+export const updateWasteVehicle = (id, data) => api.put(`/waste-vehicles/${id}`, data);
+export const deleteWasteVehicle = (id) => api.delete(`/waste-vehicles/${id}`);
+
+// Collection Route APIs
+export const createCollectionRoute = (data) => api.post('/collection-routes', data);
+export const getCollectionRoutes = (params) => api.get('/collection-routes', { params });
+export const getCollectionRouteById = (id) => api.get(`/collection-routes/${id}`);
+export const updateCollectionRoute = (id, data) => api.put(`/collection-routes/${id}`, data);
+
+// Waste Bin APIs
+export const createWasteBin = (data) => api.post('/waste-bins', data);
+export const getWasteBins = (params) => api.get('/waste-bins', { params });
+export const getWasteBinById = (id) => api.get(`/waste-bins/${id}`);
+export const updateWasteBin = (id, data) => api.put(`/waste-bins/${id}`, data);
+
+// Waste Collection APIs
+export const createWasteCollection = (data) => api.post('/waste-collections', data);
+export const getWasteCollections = (params) => {
+  // Remove undefined or empty params
+  const filteredParams = {};
+  if (params) {
+    Object.keys(params).forEach(key => {
+      if (params[key] && params[key] !== '') {
+        filteredParams[key] = params[key];
+      }
+    });
+  }
+  return api.get('/waste-collections', { params: filteredParams });
+};
+export const getDailyWasteReport = (date) => {
+  if (!date) return Promise.reject(new Error("Date is required"));
+  return api.get(`/waste-collections/reports/daily?report_date=${date}`);
+};
+
+// Sanitation Worker APIs
+export const createSanitationWorker = (data) => api.post('/sanitation-workers', data);
+export const getSanitationWorkers = (params) => api.get('/sanitation-workers', { params });
+export const updateSanitationWorker = (id, data) => api.put(`/sanitation-workers/${id}`, data);
+
+// Waste Dashboard APIs
+export const getWasteDashboardStats = () => api.get('/waste-dashboard/stats');
+export const getWasteCollectionTrend = (days = 7) => api.get(`/waste-dashboard/collection-trend?days=${days}`);
 
 export default api;

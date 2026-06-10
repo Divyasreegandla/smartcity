@@ -15,6 +15,12 @@ from .transformers import Transformer, TransformerStatus
 from .electricity_usage import ElectricityUsage
 from .power_outages import PowerOutage, OutageStatus
 from .transformer_maintenance import TransformerMaintenance, MaintenanceType
+# Phase 5 - Waste Management
+from .waste_vehicles import WasteVehicle, VehicleStatus, VehicleType
+from .collection_routes import CollectionRoute, RouteStatus
+from .waste_bins import WasteBin, BinStatus
+from .waste_collection_logs import WasteCollectionLog
+from .sanitation_workers import SanitationWorker, ShiftType, WorkerStatus
 
 __all__ = [
     "User",
@@ -43,5 +49,17 @@ __all__ = [
     "PowerOutage",
     "OutageStatus",
     "TransformerMaintenance",
-    "MaintenanceType"
+    "MaintenanceType",
+    # Phase 5
+    "WasteVehicle",
+    "VehicleStatus",
+    "VehicleType",
+    "CollectionRoute",
+    "RouteStatus",
+    "WasteBin",
+    "BinStatus",
+    "WasteCollectionLog",
+    "SanitationWorker",
+    "ShiftType",
+    "WorkerStatus"
 ]

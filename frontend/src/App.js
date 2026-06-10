@@ -26,6 +26,12 @@ import TransformerManagement from './pages/TransformerManagement';
 import PowerOutageTracking from './pages/PowerOutageTracking';
 import ElectricityConsumption from './pages/ElectricityConsumption';
 import MaintenanceManagement from './pages/MaintenanceManagement';
+import WasteDashboard from './pages/WasteDashboard';
+import VehicleManagement from './pages/VehicleManagement';
+import RouteManagement from './pages/RouteManagement';
+import WasteBinMonitoring from './pages/WasteBinMonitoring';
+import CollectionReports from './pages/CollectionReports';
+import SanitationWorkerManagement from './pages/SanitationWorkerManagement';
 
 function App() {
   return (
@@ -116,6 +122,38 @@ function App() {
     <MaintenanceManagement />
   </ProtectedRoute>
 } />
+{/* Phase 5 - Waste Management Routes */}
+<Route path="/waste-dashboard" element={
+  <ProtectedRoute>
+    <WasteDashboard />
+  </ProtectedRoute>
+} />
+<Route path="/waste-vehicles" element={
+  <ProtectedRoute>
+    <VehicleManagement />
+  </ProtectedRoute>
+} />
+<Route path="/waste-routes" element={
+  <ProtectedRoute>
+    <RouteManagement />
+  </ProtectedRoute>
+} />
+<Route path="/waste-bins" element={
+  <ProtectedRoute>
+    <WasteBinMonitoring />
+  </ProtectedRoute>
+} />
+<Route path="/waste-collections" element={
+  <ProtectedRoute>
+    <CollectionReports />
+  </ProtectedRoute>
+} />
+<Route path="/sanitation-workers" element={
+  <ProtectedRoute>
+    <SanitationWorkerManagement />
+  </ProtectedRoute>
+} />
+
 
 
         </Routes>
