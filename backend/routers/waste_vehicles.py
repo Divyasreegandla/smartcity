@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database.database import get_db
-from models.waste_vehicles import WasteVehicle, VehicleStatus
+from services.waste_service import WasteManagementService
 from schemas.waste_vehicle_schemas import WasteVehicleCreate, WasteVehicleUpdate, WasteVehicleResponse
 from utils.auth_utils import get_current_user, get_current_admin_user
 from models.users import User
 
 router = APIRouter(prefix="/waste-vehicles", tags=["Waste Vehicle"])
+
 
 @router.post("/", response_model=WasteVehicleResponse, status_code=status.HTTP_201_CREATED)
 def create_vehicle(
@@ -15,28 +16,26 @@ def create_vehicle(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
-    existing = db.query(WasteVehicle).filter(WasteVehicle.vehicle_number == data.vehicle_number).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Vehicle number already exists")
+    service = WasteManagementService(db)
+    vehicle, error = service.create_vehicle(data)
     
-    db_vehicle = WasteVehicle(**data.model_dump())
-    db.add(db_vehicle)
-    db.commit()
-    db.refresh(db_vehicle)
-    return db_vehicle
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+    
+    return vehicle
+
 
 @router.get("/", response_model=List[WasteVehicleResponse])
 def get_vehicles(
     skip: int = 0,
     limit: int = 100,
-    status: Optional[VehicleStatus] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(WasteVehicle)
-    if status:
-        query = query.filter(WasteVehicle.status == status)
-    return query.offset(skip).limit(limit).all()
+    service = WasteManagementService(db)
+    return service.get_all_vehicles(skip, limit, status)
+
 
 @router.get("/{vehicle_id}", response_model=WasteVehicleResponse)
 def get_vehicle(
@@ -44,10 +43,14 @@ def get_vehicle(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    vehicle = db.query(WasteVehicle).filter(WasteVehicle.id == vehicle_id).first()
+    service = WasteManagementService(db)
+    vehicle = service.get_vehicle_by_id(vehicle_id)
+    
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
+    
     return vehicle
+
 
 @router.put("/{vehicle_id}", response_model=WasteVehicleResponse)
 def update_vehicle(
@@ -56,17 +59,14 @@ def update_vehicle(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
-    vehicle = db.query(WasteVehicle).filter(WasteVehicle.id == vehicle_id).first()
+    service = WasteManagementService(db)
+    vehicle = service.update_vehicle(vehicle_id, data)
+    
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     
-    update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(vehicle, field, value)
-    
-    db.commit()
-    db.refresh(vehicle)
     return vehicle
+
 
 @router.delete("/{vehicle_id}")
 def delete_vehicle(
@@ -74,10 +74,10 @@ def delete_vehicle(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user)
 ):
-    vehicle = db.query(WasteVehicle).filter(WasteVehicle.id == vehicle_id).first()
-    if not vehicle:
+    service = WasteManagementService(db)
+    deleted = service.delete_vehicle(vehicle_id)
+    
+    if not deleted:
         raise HTTPException(status_code=404, detail="Vehicle not found")
     
-    db.delete(vehicle)
-    db.commit()
     return {"message": "Vehicle deleted successfully"}

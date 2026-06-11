@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
 from database.database import get_db
-from models.water_consumption import WaterConsumption
-from models.water_zones import WaterZone
+from services.water_service import WaterService
 from schemas.water_consumption_schemas import WaterConsumptionCreate, WaterConsumptionResponse
 from utils.auth_utils import get_current_user, get_current_admin_user
 from models.users import User
 
 router = APIRouter(prefix="/water-consumption", tags=["Consumption"])
+
 
 @router.post("/", response_model=WaterConsumptionResponse, status_code=status.HTTP_201_CREATED)
 def add_consumption(
@@ -18,16 +18,14 @@ def add_consumption(
     current_user: User = Depends(get_current_admin_user)
 ):
     """Add daily water consumption (Admin only)"""
-    zone = db.query(WaterZone).filter(WaterZone.id == consumption_data.zone_id).first()
-    if not zone:
-        raise HTTPException(status_code=404, detail="Water zone not found")
+    service = WaterService(db)
+    consumption, error = service.add_consumption(consumption_data)
     
-    db_consumption = WaterConsumption(**consumption_data.model_dump())
-    db.add(db_consumption)
-    db.commit()
-    db.refresh(db_consumption)
+    if error:
+        raise HTTPException(status_code=404, detail=error)
     
-    return {**db_consumption.__dict__, "zone_name": zone.zone_name}
+    return consumption
+
 
 @router.get("/", response_model=List[WaterConsumptionResponse])
 def get_consumption(
@@ -40,24 +38,9 @@ def get_consumption(
     current_user: User = Depends(get_current_user)
 ):
     """Get water consumption records"""
-    query = db.query(WaterConsumption)
-    if zone_id:
-        query = query.filter(WaterConsumption.zone_id == zone_id)
-    if start_date:
-        query = query.filter(WaterConsumption.consumption_date >= start_date)
-    if end_date:
-        query = query.filter(WaterConsumption.consumption_date <= end_date)
-    
-    records = query.offset(skip).limit(limit).all()
-    
-    result = []
-    for record in records:
-        zone = db.query(WaterZone).filter(WaterZone.id == record.zone_id).first()
-        result.append({
-            **record.__dict__,
-            "zone_name": zone.zone_name if zone else None
-        })
-    return result
+    service = WaterService(db)
+    return service.get_consumption_records(skip, limit, zone_id, start_date, end_date)
+
 
 @router.get("/zone/{zone_id}")
 def get_zone_consumption_summary(
@@ -68,25 +51,10 @@ def get_zone_consumption_summary(
     current_user: User = Depends(get_current_user)
 ):
     """Get consumption summary for a zone"""
-    zone = db.query(WaterZone).filter(WaterZone.id == zone_id).first()
-    if not zone:
+    service = WaterService(db)
+    summary = service.get_zone_consumption_summary(zone_id, start_date, end_date)
+    
+    if not summary:
         raise HTTPException(status_code=404, detail="Water zone not found")
     
-    query = db.query(WaterConsumption).filter(WaterConsumption.zone_id == zone_id)
-    if start_date:
-        query = query.filter(WaterConsumption.consumption_date >= start_date)
-    if end_date:
-        query = query.filter(WaterConsumption.consumption_date <= end_date)
-    
-    records = query.all()
-    total_consumption = sum(r.total_liters_consumed for r in records)
-    avg_consumption = total_consumption / len(records) if records else 0
-    
-    return {
-        "zone_id": zone_id,
-        "zone_name": zone.zone_name,
-        "zone_code": zone.zone_code,
-        "total_records": len(records),
-        "total_consumption_liters": total_consumption,
-        "average_consumption_liters": avg_consumption
-    }
+    return summary

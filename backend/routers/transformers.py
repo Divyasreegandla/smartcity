@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database.database import get_db
-from models.transformers import Transformer, TransformerStatus
-from models.substations import Substation
+from services.power_service import PowerService
 from schemas.transformer_schemas import TransformerCreate, TransformerUpdate, TransformerResponse
 from utils.auth_utils import get_current_user, get_current_admin_user
 from models.users import User
 
 router = APIRouter(prefix="/transformers", tags=["Transformers"])
+
 
 @router.post("/", response_model=TransformerResponse, status_code=status.HTTP_201_CREATED)
 def create_transformer(
@@ -17,50 +17,28 @@ def create_transformer(
     current_user: User = Depends(get_current_admin_user)
 ):
     """Create a new transformer (Admin only)"""
-    substation = db.query(Substation).filter(Substation.id == data.substation_id).first()
-    if not substation:
-        raise HTTPException(status_code=404, detail="Substation not found")
+    service = PowerService(db)
+    transformer, error = service.create_transformer(data)
     
-    existing = db.query(Transformer).filter(Transformer.transformer_code == data.transformer_code).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Transformer code already exists")
+    if error:
+        raise HTTPException(status_code=400, detail=error)
     
-    db_transformer = Transformer(**data.model_dump())
-    db.add(db_transformer)
-    db.commit()
-    db.refresh(db_transformer)
-    
-    return {
-        **db_transformer.__dict__,
-        "substation_name": substation.substation_name
-    }
+    return transformer
+
 
 @router.get("/", response_model=List[TransformerResponse])
 def get_transformers(
     skip: int = 0,
     limit: int = 100,
     substation_id: Optional[int] = None,
-    status: Optional[TransformerStatus] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get all transformers"""
-    query = db.query(Transformer)
-    if substation_id:
-        query = query.filter(Transformer.substation_id == substation_id)
-    if status:
-        query = query.filter(Transformer.status == status)
-    
-    transformers = query.offset(skip).limit(limit).all()
-    
-    result = []
-    for t in transformers:
-        substation = db.query(Substation).filter(Substation.id == t.substation_id).first()
-        result.append({
-            **t.__dict__,
-            "substation_name": substation.substation_name if substation else None
-        })
-    return result
+    service = PowerService(db)
+    return service.get_all_transformers(skip, limit, substation_id, status)
+
 
 @router.get("/{transformer_id}", response_model=TransformerResponse)
 def get_transformer(
@@ -69,15 +47,14 @@ def get_transformer(
     current_user: User = Depends(get_current_user)
 ):
     """Get transformer by ID"""
-    transformer = db.query(Transformer).filter(Transformer.id == transformer_id).first()
+    service = PowerService(db)
+    transformer = service.get_transformer_by_id(transformer_id)
+    
     if not transformer:
         raise HTTPException(status_code=404, detail="Transformer not found")
     
-    substation = db.query(Substation).filter(Substation.id == transformer.substation_id).first()
-    return {
-        **transformer.__dict__,
-        "substation_name": substation.substation_name if substation else None
-    }
+    return transformer
+
 
 @router.put("/{transformer_id}", response_model=TransformerResponse)
 def update_transformer(
@@ -87,19 +64,40 @@ def update_transformer(
     current_user: User = Depends(get_current_admin_user)
 ):
     """Update transformer status (Admin only)"""
-    transformer = db.query(Transformer).filter(Transformer.id == transformer_id).first()
+    service = PowerService(db)
+    transformer = service.update_transformer(transformer_id, data)
+    
     if not transformer:
         raise HTTPException(status_code=404, detail="Transformer not found")
     
-    update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(transformer, field, value)
+    return transformer
+
+
+@router.get("/{transformer_id}/health")
+def get_transformer_health(
+    transformer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get transformer health status"""
+    service = PowerService(db)
+    health = service.get_transformer_health(transformer_id)
     
-    db.commit()
-    db.refresh(transformer)
+    if not health:
+        raise HTTPException(status_code=404, detail="Transformer not found")
     
-    substation = db.query(Substation).filter(Substation.id == transformer.substation_id).first()
-    return {
-        **transformer.__dict__,
-        "substation_name": substation.substation_name if substation else None
-    }
+    return health
+
+
+@router.get("/{transformer_id}/maintenance-history")
+def get_transformer_maintenance(
+    transformer_id: int,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get transformer maintenance history"""
+    service = PowerService(db)
+    history = service.get_transformer_maintenance_history(transformer_id, limit)
+    
+    return history
