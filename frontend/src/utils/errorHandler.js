@@ -6,21 +6,30 @@ export const getErrorMessage = (error) => {
   if (error.response?.data?.detail) {
     const detail = error.response.data.detail;
     
+    // If detail is a string
     if (typeof detail === 'string') {
       return detail;
     }
     
+    // If detail is an array (Pydantic validation errors)
     if (Array.isArray(detail)) {
-      // Pydantic validation errors - extract the msg
-      if (detail[0]?.msg) {
-        return detail[0].msg;
+      if (detail.length > 0) {
+        // Extract the first error message
+        const firstError = detail[0];
+        if (firstError.msg) {
+          return firstError.msg;
+        }
+        if (firstError.message) {
+          return firstError.message;
+        }
       }
       return 'Validation error occurred';
     }
     
+    // If detail is an object
     if (typeof detail === 'object') {
-      // Try to get msg from object
       if (detail.msg) return detail.msg;
+      if (detail.message) return detail.message;
       return 'Validation error occurred';
     }
   }

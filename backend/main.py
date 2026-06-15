@@ -35,7 +35,13 @@ from routers import (
     waste_bins_router, 
     waste_collections_router,
     sanitation_workers_router, 
-    waste_dashboard_router
+    waste_dashboard_router,
+    traffic_signals_router,
+    traffic_incidents_router,
+    congestion_reports_router,
+    road_maintenance_router,
+    traffic_violations_router,
+    traffic_dashboard_router
 )
 
 # Create tables
@@ -92,6 +98,12 @@ app.include_router(waste_bins_router)
 app.include_router(waste_collections_router)
 app.include_router(sanitation_workers_router)
 app.include_router(waste_dashboard_router)
+app.include_router(traffic_signals_router)
+app.include_router(traffic_incidents_router)
+app.include_router(congestion_reports_router)
+app.include_router(road_maintenance_router)
+app.include_router(traffic_violations_router)
+app.include_router(traffic_dashboard_router)
 
 # Health check endpoint
 @app.get("/health")

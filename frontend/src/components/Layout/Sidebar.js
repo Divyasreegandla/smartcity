@@ -19,7 +19,12 @@ import {
   FaTruck,
   FaRoute,
   FaTrashAlt,
-  FaRecycle
+  FaRecycle,
+  FaTrafficLight,
+  FaCarCrash,
+  FaRoad,
+  FaGavel,
+  FaMapMarkerAlt
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -39,6 +44,11 @@ const Sidebar = () => {
     { path: '/water-leaks', name: 'Report Leak', icon: FaExclamationTriangle },
     { path: '/electricity-dashboard', name: 'Power Dashboard', icon: FaPlug },
     { path: '/waste-dashboard', name: 'Waste Dashboard', icon: FaRecycle },
+    // Phase 6 - Traffic Management for Citizens
+    { path: '/traffic-dashboard', name: 'Traffic Dashboard', icon: FaTrafficLight },
+    { path: '/traffic-incidents', name: 'Report Incident', icon: FaCarCrash },
+    { path: '/congestion-reports', name: 'Congestion', icon: FaChartLine },
+    { path: '/traffic-violations', name: 'My Violations', icon: FaGavel },
   ];
 
   // Admin Menu
@@ -73,6 +83,14 @@ const Sidebar = () => {
     { path: '/waste-bins', name: 'Waste Bins', icon: FaTrashAlt },
     { path: '/waste-collections', name: 'Collections', icon: FaChartLine },
     { path: '/sanitation-workers', name: 'Sanitation', icon: FaUsers },
+    
+    // Phase 6 - Traffic Management
+    { path: '/traffic-dashboard', name: 'Traffic Dashboard', icon: FaChartBar },
+    { path: '/traffic-signals', name: 'Traffic Signals', icon: FaTrafficLight },
+    { path: '/traffic-incidents', name: 'Incidents', icon: FaCarCrash },
+    { path: '/congestion-reports', name: 'Congestion', icon: FaChartLine },
+    { path: '/road-maintenance', name: 'Road Maintenance', icon: FaRoad },
+    { path: '/traffic-violations', name: 'Violations', icon: FaGavel },
   ];
 
   const menuItems = isAdmin ? adminMenu : citizenMenu;
@@ -81,7 +99,8 @@ const Sidebar = () => {
     const mainItems = menuItems.slice(0, 5);
     const waterItems = menuItems.slice(5, 11);
     const electricityItems = menuItems.slice(11, 17);
-    const wasteItems = menuItems.slice(17);
+    const wasteItems = menuItems.slice(17, 23);
+    const trafficItems = menuItems.slice(23, 29);
 
     return (
       <>
@@ -174,27 +193,157 @@ const Sidebar = () => {
             <span>{item.name}</span>
           </NavLink>
         ))}
+
+        {/* Phase 6 - Traffic Management Section */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-purple-400 uppercase tracking-wider flex items-center">
+            <FaTrafficLight className="mr-1" size={10} /> Traffic Management
+          </p>
+        </div>
+        {trafficItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
       </>
     );
   };
 
   const renderCitizenMenu = () => {
-    return menuItems.map((item) => (
-      <NavLink
-        key={item.path}
-        to={item.path}
-        className={({ isActive }) =>
-          `flex items-center space-x-3 px-6 py-3 transition-colors ${
-            isActive
-              ? 'bg-primary-600 text-white border-l-4 border-primary-400'
-              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-          }`
-        }
-      >
-        <item.icon className="text-lg" />
-        <span>{item.name}</span>
-      </NavLink>
-    ));
+    // Split citizen menu into sections
+    const mainItems = menuItems.slice(0, 5);
+    const waterItems = menuItems.slice(5, 8);
+    const powerItems = menuItems.slice(8, 9);
+    const wasteItems = menuItems.slice(9, 10);
+    const trafficItems = menuItems.slice(10, 14);
+
+    return (
+      <>
+        {/* Main Section */}
+        <div className="px-4 py-2 mt-2">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Main</p>
+        </div>
+        {mainItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+
+        {/* Water Supply Section */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-blue-400 uppercase tracking-wider flex items-center">
+            <FaWater className="mr-1" size={10} /> Water Supply
+          </p>
+        </div>
+        {waterItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+
+        {/* Electricity Section */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-yellow-400 uppercase tracking-wider flex items-center">
+            <FaBolt className="mr-1" size={10} /> Electricity
+          </p>
+        </div>
+        {powerItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+
+        {/* Waste Management Section */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-green-400 uppercase tracking-wider flex items-center">
+            <FaTrashAlt className="mr-1" size={10} /> Waste Management
+          </p>
+        </div>
+        {wasteItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+
+        {/* Phase 6 - Traffic Management Section */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-purple-400 uppercase tracking-wider flex items-center">
+            <FaTrafficLight className="mr-1" size={10} /> Traffic Management
+          </p>
+        </div>
+        {trafficItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+      </>
+    );
   };
 
   return (
@@ -217,7 +366,7 @@ const Sidebar = () => {
       </div>
       
       <div className="p-4 border-t border-gray-800 bg-gray-900">
-        <p className="text-xs text-gray-500 text-center">Smart City Platform v5.0</p>
+        <p className="text-xs text-gray-500 text-center">Smart City Platform v6.0</p>
       </div>
     </aside>
   );

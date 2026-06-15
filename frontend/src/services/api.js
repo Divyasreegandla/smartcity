@@ -22,6 +22,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 // In api.js, ensure the error interceptor extracts string messages
+// Update the error interceptor in api.js
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,13 +34,22 @@ api.interceptors.response.use(
     } 
     else if (error.response?.data?.detail) {
       const detail = error.response.data.detail;
+      
+      // Handle string detail
       if (typeof detail === 'string') {
         toast.error(detail);
-      } else if (Array.isArray(detail)) {
+      } 
+      // Handle array of validation errors
+      else if (Array.isArray(detail)) {
         detail.forEach((err) => {
           const message = err.msg || err.message || 'Validation error';
           toast.error(message);
         });
+      }
+      // Handle object detail
+      else if (typeof detail === 'object') {
+        const message = detail.msg || detail.message || 'Validation error';
+        toast.error(message);
       }
     }
     return Promise.reject(error);
@@ -196,5 +206,42 @@ export const updateSanitationWorker = (id, data) => api.put(`/sanitation-workers
 // Waste Dashboard APIs
 export const getWasteDashboardStats = () => api.get('/waste-dashboard/stats');
 export const getWasteCollectionTrend = (days = 7) => api.get(`/waste-dashboard/collection-trend?days=${days}`);
+
+// ============ PHASE 6: Traffic Management APIs ============
+
+// Traffic Signals
+export const createTrafficSignal = (data) => api.post('/traffic-signals', data);
+export const getTrafficSignals = (params) => api.get('/traffic-signals', { params });
+export const getTrafficSignalById = (id) => api.get(`/traffic-signals/${id}`);
+export const updateTrafficSignal = (id, data) => api.put(`/traffic-signals/${id}`, data);
+export const deleteTrafficSignal = (id) => api.delete(`/traffic-signals/${id}`);
+
+// Traffic Incidents
+export const createTrafficIncident = (data) => api.post('/traffic-incidents', data);
+export const getTrafficIncidents = (params) => api.get('/traffic-incidents', { params });
+export const getTrafficIncidentById = (id) => api.get(`/traffic-incidents/${id}`);
+export const updateTrafficIncident = (id, data) => api.put(`/traffic-incidents/${id}`, data);
+export const getActiveIncidents = () => api.get('/traffic-incidents/active');
+
+// Congestion Reports
+export const createCongestionReport = (data) => api.post('/congestion-reports', data);
+export const getCongestionReports = (params) => api.get('/congestion-reports', { params });
+export const getAreaCongestion = (areaName) => api.get(`/congestion-reports/area/${areaName}`);
+export const getHighCongestionAreas = () => api.get('/congestion-reports/high-congestion/areas');
+
+// Road Maintenance
+export const createRoadMaintenance = (data) => api.post('/road-maintenance', data);
+export const getRoadMaintenance = (params) => api.get('/road-maintenance', { params });
+export const updateRoadMaintenance = (id, data) => api.put(`/road-maintenance/${id}`, data);
+export const getActiveMaintenance = () => api.get('/road-maintenance/active');
+
+// Traffic Violations
+export const createTrafficViolation = (data) => api.post('/traffic-violations', data);
+export const getTrafficViolations = (params) => api.get('/traffic-violations', { params });
+export const getTrafficViolationById = (id) => api.get(`/traffic-violations/${id}`);
+export const updateTrafficViolation = (id, data) => api.put(`/traffic-violations/${id}`, data);
+
+// Traffic Dashboard
+export const getTrafficDashboardStats = () => api.get('/traffic-dashboard/stats');
 
 export default api;

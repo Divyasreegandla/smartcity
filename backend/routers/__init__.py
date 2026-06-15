@@ -22,6 +22,12 @@ from .waste_bins import router as waste_bins_router
 from .waste_collections import router as waste_collections_router
 from .sanitation_workers import router as sanitation_workers_router
 from .waste_dashboard import router as waste_dashboard_router
+from .traffic_signals import router as traffic_signals_router
+from .traffic_incidents import router as traffic_incidents_router
+from .congestion_reports import router as congestion_reports_router
+from .road_maintenance import router as road_maintenance_router
+from .traffic_violations import router as traffic_violations_router
+from .traffic_dashboard import router as traffic_dashboard_router
 
 __all__ = [
     "auth_router",
@@ -46,5 +52,11 @@ __all__ = [
     "waste_bins_router",
     "waste_collections_router",
     "sanitation_workers_router",
-    "waste_dashboard_router"
+    "waste_dashboard_router",
+    "traffic_signals_router",
+    "traffic_incidents_router",
+    "congestion_reports_router",
+    "road_maintenance_router",
+    "traffic_violations_router",
+    "traffic_dashboard_router"
 ]

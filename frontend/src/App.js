@@ -32,6 +32,12 @@ import RouteManagement from './pages/RouteManagement';
 import WasteBinMonitoring from './pages/WasteBinMonitoring';
 import CollectionReports from './pages/CollectionReports';
 import SanitationWorkerManagement from './pages/SanitationWorkerManagement';
+import TrafficDashboard from './pages/traffic/TrafficDashboard';
+import TrafficSignals from './pages/traffic/TrafficSignals';
+import TrafficIncidents from './pages/traffic/TrafficIncidents';
+import CongestionReports from './pages/traffic/CongestionReports';
+import RoadMaintenance from './pages/traffic/RoadMaintenance';
+import TrafficViolations from './pages/traffic/TrafficViolations';
 
 function App() {
   return (
@@ -153,6 +159,13 @@ function App() {
     <SanitationWorkerManagement />
   </ProtectedRoute>
 } />
+<Route path="/traffic-dashboard" element={<ProtectedRoute><TrafficDashboard /></ProtectedRoute>} />
+<Route path="/traffic-signals" element={<ProtectedRoute><TrafficSignals /></ProtectedRoute>} />
+<Route path="/traffic-incidents" element={<ProtectedRoute><TrafficIncidents /></ProtectedRoute>} />
+<Route path="/congestion-reports" element={<ProtectedRoute><CongestionReports /></ProtectedRoute>} />
+<Route path="/road-maintenance" element={<ProtectedRoute><RoadMaintenance /></ProtectedRoute>} />
+<Route path="/traffic-violations" element={<ProtectedRoute><TrafficViolations /></ProtectedRoute>} />
+
 
 
 
