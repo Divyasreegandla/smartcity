@@ -24,7 +24,17 @@ import {
   FaCarCrash,
   FaRoad,
   FaGavel,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  // ============ PHASE 7 - Billing Icons ============
+  FaFileInvoice,
+  FaClock,
+  FaHistory,
+  FaCreditCard,
+  FaMoneyBillWave,
+  FaShieldAlt,
+  FaEnvelope,
+  FaPhone,
+  FaWallet
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -49,6 +59,13 @@ const Sidebar = () => {
     { path: '/traffic-incidents', name: 'Report Incident', icon: FaCarCrash },
     { path: '/congestion-reports', name: 'Congestion', icon: FaChartLine },
     { path: '/traffic-violations', name: 'My Violations', icon: FaGavel },
+    // ============ PHASE 7 - Billing for Citizens ============
+    { path: '/bills', name: 'My Bills', icon: FaFileInvoice },
+    { path: '/bills/pending', name: 'Pending Bills', icon: FaClock },
+    { path: '/payment-history', name: 'Payment History', icon: FaHistory },
+    { path: '/property-tax', name: 'Property Tax', icon: FaBuilding },
+    { path: '/verify-mobile', name: 'Verify Mobile', icon: FaPhone },
+    { path: '/verify-email', name: 'Verify Email', icon: FaEnvelope },
   ];
 
   // Admin Menu
@@ -91,6 +108,16 @@ const Sidebar = () => {
     { path: '/congestion-reports', name: 'Congestion', icon: FaChartLine },
     { path: '/road-maintenance', name: 'Road Maintenance', icon: FaRoad },
     { path: '/traffic-violations', name: 'Violations', icon: FaGavel },
+    
+    // ============ PHASE 7 - Billing for Admin ============
+    { path: '/generate-bill', name: 'Generate Bill', icon: FaPlusCircle },
+    
+    { path: '/bills', name: 'All Bills', icon: FaFileInvoice },
+    { path: '/bills/pending', name: 'Pending Bills', icon: FaClock },
+    { path: '/payment-history', name: 'Payment History', icon: FaHistory },
+    { path: '/property-tax', name: 'Property Tax', icon: FaBuilding },
+    { path: '/verify-mobile', name: 'Verify Mobile', icon: FaPhone },
+    { path: '/verify-email', name: 'Verify Email', icon: FaEnvelope },
   ];
 
   const menuItems = isAdmin ? adminMenu : citizenMenu;
@@ -101,6 +128,7 @@ const Sidebar = () => {
     const electricityItems = menuItems.slice(11, 17);
     const wasteItems = menuItems.slice(17, 23);
     const trafficItems = menuItems.slice(23, 29);
+    const billingItems = menuItems.slice(29, 35);
 
     return (
       <>
@@ -216,6 +244,29 @@ const Sidebar = () => {
             <span>{item.name}</span>
           </NavLink>
         ))}
+
+        {/* ============ PHASE 7 - Billing Section ============ */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-emerald-400 uppercase tracking-wider flex items-center">
+            <FaWallet className="mr-1" size={10} /> Billing & Payments
+          </p>
+        </div>
+        {billingItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
       </>
     );
   };
@@ -227,6 +278,7 @@ const Sidebar = () => {
     const powerItems = menuItems.slice(8, 9);
     const wasteItems = menuItems.slice(9, 10);
     const trafficItems = menuItems.slice(10, 14);
+    const billingItems = menuItems.slice(14, 20);
 
     return (
       <>
@@ -342,6 +394,29 @@ const Sidebar = () => {
             <span>{item.name}</span>
           </NavLink>
         ))}
+
+        {/* ============ PHASE 7 - Billing Section ============ */}
+        <div className="px-4 py-2 mt-4 pt-2 border-t border-gray-800">
+          <p className="text-xs text-emerald-400 uppercase tracking-wider flex items-center">
+            <FaWallet className="mr-1" size={10} /> Billing & Payments
+          </p>
+        </div>
+        {billingItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-6 py-3 transition-colors ${
+                isActive
+                  ? 'bg-primary-600 text-white border-l-4 border-primary-400'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <item.icon className="text-lg" />
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
       </>
     );
   };
@@ -366,7 +441,8 @@ const Sidebar = () => {
       </div>
       
       <div className="p-4 border-t border-gray-800 bg-gray-900">
-        <p className="text-xs text-gray-500 text-center">Smart City Platform v6.0</p>
+        <p className="text-xs text-gray-500 text-center">Smart City Platform v7.0</p>
+        <p className="text-xs text-gray-600 text-center mt-1">Billing & Payment System</p>
       </div>
     </aside>
   );

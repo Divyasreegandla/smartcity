@@ -4,48 +4,42 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from database.database import engine, Base
+from database.database import engine, Base, create_tables
 from routers import (
-    # Phase 1 & 2 - Auth & Core
-    auth_router, 
-    citizens_router, 
-    complaints_router, 
-    departments_router, 
-    assignments_router,
-    
-    # Phase 3 - Water Management
-    water_zones_router, 
-    water_schedules_router,
-    water_tanks_router, 
-    water_consumption_router,
-    water_leaks_router, 
-    water_dashboard_router,
-    
-    # Phase 3 - Power Management
-    substations_router, 
-    transformers_router,
-    electricity_usage_router, 
-    power_outages_router,
-    maintenance_router, 
-    power_dashboard_router,
-    
-    # Phase 3 - Waste Management
-    waste_vehicles_router, 
-    collection_routes_router,
-    waste_bins_router, 
-    waste_collections_router,
-    sanitation_workers_router, 
-    waste_dashboard_router,
-    traffic_signals_router,
-    traffic_incidents_router,
-    congestion_reports_router,
-    road_maintenance_router,
-    traffic_violations_router,
-    traffic_dashboard_router
+    auth_router, citizens_router, complaints_router, 
+    departments_router, assignments_router,
+    water_zones_router, water_schedules_router, water_tanks_router,
+    water_consumption_router, water_leaks_router, water_dashboard_router,
+    substations_router, transformers_router, electricity_usage_router,
+    power_outages_router, maintenance_router, power_dashboard_router,
+    waste_vehicles_router, collection_routes_router, waste_bins_router,
+    waste_collections_router, sanitation_workers_router, waste_dashboard_router,
+    traffic_signals_router, traffic_incidents_router, congestion_reports_router,
+    road_maintenance_router, traffic_violations_router, traffic_dashboard_router,
+    bills_router, property_tax_router, payments_router,
+)
+from routers.otp import router as otp_router
+
+
+# ✅ Import all models to register them with Base
+from models import (
+    users, citizen_profiles, departments, complaints,
+    complaint_assignments, complaint_attachments, complaint_status_history,
+    bill_categories, citizen_bills, bill_payments, payment_receipts,
+    email_verifications, mobile_verifications,
+    water_zones, water_tanks, water_consumption, water_leak_reports, water_supply_schedules,
+    substations, transformers, transformer_maintenance, electricity_usage, power_outages,
+    waste_vehicles, waste_bins, collection_routes, waste_collection_logs, sanitation_workers,
+    traffic_signals, traffic_incidents, congestion_reports, road_maintenance, traffic_violations
 )
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# ✅ Create tables on startup
+print("=" * 60)
+print("🚀 SMART CITY PLATFORM STARTING...")
+print("=" * 60)
+
+# Create all tables
+create_tables()
 
 # Create uploads directory
 Path("uploads/complaints").mkdir(parents=True, exist_ok=True)
@@ -56,7 +50,7 @@ app = FastAPI(
     description="Smart City Management System with Repository Pattern"
 )
 
-# CORS middleware - Allow your frontend origin
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000"],
@@ -65,33 +59,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files for uploads
+# Static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Include routers WITHOUT /api/v1 prefix (so they match your frontend)
-app.include_router(auth_router)           # Now accessible at /auth/*
-app.include_router(citizens_router)       # Now accessible at /citizens/*
-app.include_router(complaints_router)     # Now accessible at /complaints/*
-app.include_router(departments_router)    # Now accessible at /departments/*
-app.include_router(assignments_router)    # Now accessible at /assignments/*
-
-# Water Supply routers
+# Include routers
+app.include_router(auth_router)
+app.include_router(citizens_router)
+app.include_router(complaints_router)
+app.include_router(departments_router)
+app.include_router(assignments_router)
 app.include_router(water_zones_router)
 app.include_router(water_schedules_router)
 app.include_router(water_tanks_router)
 app.include_router(water_consumption_router)
 app.include_router(water_leaks_router)
 app.include_router(water_dashboard_router)
-
-# Electricity Power routers
 app.include_router(substations_router)
 app.include_router(transformers_router)
 app.include_router(electricity_usage_router)
 app.include_router(power_outages_router)
 app.include_router(maintenance_router)
 app.include_router(power_dashboard_router)
-
-# Waste Management routers
 app.include_router(waste_vehicles_router)
 app.include_router(collection_routes_router)
 app.include_router(waste_bins_router)
@@ -104,19 +92,20 @@ app.include_router(congestion_reports_router)
 app.include_router(road_maintenance_router)
 app.include_router(traffic_violations_router)
 app.include_router(traffic_dashboard_router)
+app.include_router(bills_router)
+app.include_router(property_tax_router)
+app.include_router(payments_router) 
+app.include_router(otp_router)
 
-# Health check endpoint
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "version": "5.0.0"}
 
-# Root endpoint
 @app.get("/")
 def root():
     return {
         "message": "Smart City Platform API",
         "version": "5.0.0",
-        "architecture": "Repository Pattern",
         "modules": [
             "Authentication & Authorization",
             "Citizen Management",
@@ -124,6 +113,12 @@ def root():
             "Department Management",
             "Water Supply Management",
             "Electricity Power Management",
-            "Waste Management"
+            "Waste Management",
+            "Property Tax Management"
         ]
     }
+
+print("=" * 60)
+print("✅ APPLICATION STARTED SUCCESSFULLY!")
+print("📊 Swagger UI: http://localhost:8000/docs")
+print("=" * 60)

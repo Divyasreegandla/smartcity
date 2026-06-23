@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -21,51 +22,81 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-// In api.js, ensure the error interceptor extracts string messages
-// Update the error interceptor in api.js
+
+// ✅ FIXED Response interceptor - Returns string always
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle 401 - Unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
       toast.error('Session expired. Please login again.');
-    } 
-    else if (error.response?.data?.detail) {
-      const detail = error.response.data.detail;
-      
-      // Handle string detail
-      if (typeof detail === 'string') {
-        toast.error(detail);
-      } 
-      // Handle array of validation errors
-      else if (Array.isArray(detail)) {
-        detail.forEach((err) => {
-          const message = err.msg || err.message || 'Validation error';
-          toast.error(message);
-        });
-      }
-      // Handle object detail
-      else if (typeof detail === 'object') {
-        const message = detail.msg || detail.message || 'Validation error';
-        toast.error(message);
-      }
+      return Promise.reject(error);
     }
+    
+    // ✅ Extract error message as string
+    let errorMessage = 'An error occurred';
+    
+    if (error.response?.data) {
+      const data = error.response.data;
+      
+      // Handle detail field
+      if (data.detail) {
+        const detail = data.detail;
+        
+        if (typeof detail === 'string') {
+          errorMessage = detail;
+        } else if (Array.isArray(detail)) {
+          // Extract message from each error object
+          const messages = detail.map((err) => {
+            if (typeof err === 'string') return err;
+            if (err.msg) return err.msg;
+            if (err.message) return err.message;
+            return String(err);
+          });
+          errorMessage = messages.join(', ');
+        } else if (typeof detail === 'object') {
+          if (detail.msg) errorMessage = detail.msg;
+          else if (detail.message) errorMessage = detail.message;
+          else errorMessage = JSON.stringify(detail);
+        }
+      } 
+      // Handle message field
+      else if (data.message) {
+        errorMessage = data.message;
+      }
+      // Handle string data
+      else if (typeof data === 'string') {
+        errorMessage = data;
+      }
+    } 
+    // Handle error message
+    else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // ✅ Only show toast if there's a valid string message
+    if (errorMessage && typeof errorMessage === 'string' && errorMessage.length > 0) {
+      toast.error(errorMessage);
+    }
+    
     return Promise.reject(error);
   }
 );
-// Auth APIs
+
+// ============ AUTH APIs ============
 export const register = (userData) => api.post('/auth/register', userData);
 export const login = (credentials) => api.post('/auth/login', credentials);
 export const getProfile = () => api.get('/auth/profile');
 
-// Citizen APIs
+// ============ CITIZEN APIs ============
 export const getCitizens = () => api.get('/citizens/');
 export const getCitizenProfile = (userId) => api.get(`/citizens/${userId}`);
 export const updateCitizenProfile = (userId, data) => api.put(`/citizens/${userId}`, data);
 
-// Complaint APIs
+// ============ COMPLAINT APIs ============
 export const createComplaint = (data) => api.post('/complaints', data);
 export const getComplaints = (params) => api.get('/complaints', { params });
 export const getComplaintById = (id) => api.get(`/complaints/${id}`);
@@ -81,17 +112,18 @@ export const uploadComplaintImage = (complaintId, file) => {
   });
 };
 
-// Department APIs
+// ============ DEPARTMENT APIs ============
 export const createDepartment = (data) => api.post('/departments', data);
 export const getDepartments = () => api.get('/departments');
 export const updateDepartment = (id, data) => api.put(`/departments/${id}`, data);
 export const deleteDepartment = (id) => api.delete(`/departments/${id}`);
 
-// Assignment APIs
+// ============ ASSIGNMENT APIs ============
 export const assignComplaint = (data) => api.post('/assignments', data);
 export const getComplaintAssignments = (complaintId) => api.get(`/assignments/complaint/${complaintId}`);
 export const getMyAssignments = () => api.get('/assignments/my-assignments');
-// ============ PHASE 3: Water Supply APIs ============
+
+// ============ PHASE 3: WATER SUPPLY APIs ============
 
 // Water Zones
 export const createWaterZone = (data) => api.post('/water-zones', data);
@@ -126,6 +158,9 @@ export const getWaterDashboardStats = () => api.get('/water-dashboard/stats');
 export const getWeeklyWaterTrend = () => api.get('/water-dashboard/weekly-trend');
 export const getZoneWiseWaterConsumption = () => api.get('/water-dashboard/zone-consumption');
 export const getWaterLeakageSummary = () => api.get('/water-dashboard/leakage-summary');
+
+// ============ PHASE 4: ELECTRICITY POWER APIs ============
+
 // Substation APIs
 export const createSubstation = (data) => api.post('/substations', data);
 export const getSubstations = (params) => api.get('/substations', { params });
@@ -160,6 +195,9 @@ export const updateMaintenance = (id, data) => api.put(`/transformer-maintenance
 export const getPowerDashboardStats = () => api.get('/power-dashboard/stats');
 export const getConsumptionTrend = (days = 7) => api.get(`/power-dashboard/consumption-trend?days=${days}`);
 export const getAreaRanking = () => api.get('/power-dashboard/area-ranking');
+
+// ============ PHASE 5: WASTE MANAGEMENT APIs ============
+
 // Waste Vehicle APIs
 export const createWasteVehicle = (data) => api.post('/waste-vehicles', data);
 export const getWasteVehicles = (params) => api.get('/waste-vehicles', { params });
@@ -182,7 +220,6 @@ export const updateWasteBin = (id, data) => api.put(`/waste-bins/${id}`, data);
 // Waste Collection APIs
 export const createWasteCollection = (data) => api.post('/waste-collections', data);
 export const getWasteCollections = (params) => {
-  // Remove undefined or empty params
   const filteredParams = {};
   if (params) {
     Object.keys(params).forEach(key => {
@@ -207,7 +244,7 @@ export const updateSanitationWorker = (id, data) => api.put(`/sanitation-workers
 export const getWasteDashboardStats = () => api.get('/waste-dashboard/stats');
 export const getWasteCollectionTrend = (days = 7) => api.get(`/waste-dashboard/collection-trend?days=${days}`);
 
-// ============ PHASE 6: Traffic Management APIs ============
+// ============ PHASE 6: TRAFFIC MANAGEMENT APIs ============
 
 // Traffic Signals
 export const createTrafficSignal = (data) => api.post('/traffic-signals', data);
@@ -243,5 +280,42 @@ export const updateTrafficViolation = (id, data) => api.put(`/traffic-violations
 
 // Traffic Dashboard
 export const getTrafficDashboardStats = () => api.get('/traffic-dashboard/stats');
+
+// ============ PHASE 7: BILLING & PAYMENT APIs ============
+
+// Bill APIs
+export const getBills = (params) => api.get('/bills', { params });
+export const getPendingBills = () => api.get('/bills/pending');
+export const getBillHistory = (params) => api.get('/bills/history', { params });
+export const getBillById = (id) => api.get(`/bills/${id}`);
+export const generateBill = (data) => api.post('/bills/generate', data);
+export const updateBillStatus = (id, data) => api.put(`/bills/${id}`, data);
+
+// Payment APIs
+export const createStripePayment = (data) => api.post('/payments/stripe/create', data);
+export const createRazorpayPayment = (data) => api.post('/payments/razorpay/create', data);
+export const createCashfreePayment = (data) => api.post('/payments/cashfree/create', data);
+export const verifyRazorpayPayment = (data) => api.post('/payments/razorpay/verify', data);
+export const getPaymentHistory = (params) => api.get('/payments/history', { params });
+export const getPaymentStatus = (id) => api.get(`/payments/${id}/status`);
+export const getInvoice = (id) => api.get(`/payments/invoice/${id}`);
+export const getReceipt = (id) => api.get(`/payments/receipt/${id}`);
+export const sendReceiptEmail = (id) => api.post(`/payments/send-receipt/${id}`);
+
+// OTP APIs
+export const sendEmailOTP = (data) => api.post('/otp/email/send', data);
+export const verifyEmailOTP = (data) => api.post('/otp/email/verify', data);
+export const resendEmailOTP = (data) => api.post('/otp/email/resend', data);
+export const checkEmailVerification = (email) => api.get(`/otp/email/status?email=${email}`);
+export const sendMobileOTP = (data) => api.post('/otp/mobile/send', data);
+export const verifyMobileOTP = (data) => api.post('/otp/mobile/verify', data);
+export const resendMobileOTP = (data) => api.post('/otp/mobile/resend', data);
+export const checkMobileVerification = (countryCode, mobileNumber) => 
+  api.get(`/otp/mobile/status?country_code=${countryCode}&mobile_number=${mobileNumber}`);
+
+// Property Tax APIs
+export const calculatePropertyTax = (data) => api.post('/property-tax/calculate', data);
+export const generatePropertyTaxBill = (data) => api.post('/property-tax/generate-bill', data);
+export const getPropertyTaxBills = () => api.get('/property-tax/my-bills');
 
 export default api;

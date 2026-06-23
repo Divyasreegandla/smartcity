@@ -11,3 +11,16 @@ pydantic==2.5.0
 email-validator==2.1.0
 aiofiles==23.2.1
 Pillow==10.1.0
+stripe==6.0.0
+razorpay==1.4.2
+cashfree-sdk==2.0.0
+# PDF Generation
+reportlab==4.0.4
+qrcode==7.4.2
+pillow==10.1.0
+
+# Email
+jinja2==3.1.2
+
+# OTP
+twilio==8.3.0 
